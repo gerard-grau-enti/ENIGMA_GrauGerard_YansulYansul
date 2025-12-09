@@ -1,5 +1,67 @@
 import os
 
+ALFABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+REFLECTOR_B = "YRUHQSLDPXNGOKMIEBFZCWVJAT"
+
+
+def guardar_fitxer(nom_fitxer, contingut):
+    """
+    Guardar text en el fitxer
+    """
+    try:
+        with open(nom_fitxer, 'w') as f:
+            f.write(contingut)
+        print(f"[INFO] Guardat a {nom_fitxer}")
+    except:
+        print(f"[ERROR] No s'ha pogut guardar {nom_fitxer}")
+
+def moure_rotors(r1, r2, r3):
+    """
+    Mou els rotors
+    """
+    # el rotor tres sempre es mou
+    moure_r3 = True
+    moure_r2 = False
+    moure_r1 = False
+
+    # busca on e´s el notch en entre el cero i el vint-i-cinc
+    notch3 = ALFABET.find(r3['notch'])
+    notch2 = ALFABET.find(r2['notch'])
+
+    # si el rotor tres està en el notch, arrosega el segon
+    if r3['pos'] == notch3:
+        moure_r2 = True
+
+    # si el rotor dos està en el notch, arrossega el primer i ha ell mateix
+    if r2['pos'] == notch2:
+        moure_r1 = True
+        moure_r2 = True
+
+    # executa els moviments sumant un i fent mòdul 26 per si passem de la z
+    if moure_r3: r3['pos'] = (r3['pos'] + 1) % 26
+    if moure_r2: r2['pos'] = (r2['pos'] + 1) % 26
+    if moure_r1: r1['pos'] = (r1['pos'] + 1) % 26
+
+def passar_pel_rotor(index_entrada, rotor, es_anada):
+    """
+    Calcula per quina lletra surt el senyal
+    """
+    desplacament = rotor['pos']
+
+    if es_anada:
+        # camí d'anada (entrada -> rotor)
+        index_ajustat = (index_entrada + desplacament) % 26
+        lletra = rotor['permutacio'][index_ajustat]
+        index_brut = ALFABET.find(lletra)
+        index_sortida = (index_brut - desplacament) % 26
+        return index_sortida
+    else:
+        # camí de tornada (rotor -> entrada)
+        index_ajustat = (index_entrada + desplacament) % 26
+        lletra_alfabet = ALFABET[index_ajustat]
+        pos_permutacio = rotor['permutacio'].find(lletra_alfabet)
+        index_sortida = (pos_permutacio - desplacament) % 26
+        return index_sortida
 
 def carregar_rotor(nom_fitxer):
     """
@@ -36,27 +98,84 @@ def carregar_rotor(nom_fitxer):
         return None
 
 
-# lògica de xifrat
-def xifrar_missatge(): 
+# llògica de xifrat
+def xifrar_missatge(pregunta="Escriu el missatge: "): 
     print("\n--- CARREGANT ROTORS ---")
 
+    # carrega els fitxers
     r1 = carregar_rotor("Rotor1.txt")
     r2 = carregar_rotor("Rotor2.txt")
     r3 = carregar_rotor("Rotor3.txt")
 
-    # per continuar els tres han de estar carregats bé
-    if r1 and r2 and r3:
-        print("[OK] Tots els rotors carregats correctament!")
-        print(f"Rotor 1: {r1['permutacio']} (Notch: {r1['notch']})")
-        print(f"Rotor 2: {r2['permutacio']} (Notch: {r2['notch']})")
-        print(f"Rotor 3: {r3['permutacio']} (Notch: {r3['notch']})")
-    else:
+    if not (r1 and r2 and r3):
         print("[ERROR] No es pot continuar sense els rotors vàlids.")
+        return
     
+    # demana la configuracio inicial
+    inici = input("Configuració inicial (ex: AAA): ").upper().replace(" ", "")
+    if len(inici) != 3:
+        inici = "AAA"
+        print("Format incorrecte. Es fara servir AAA.")
+    
+    # afegeix la posició inicial als diccionaris
+    r1['pos'] = ALFABET.find(inici[0])
+    r2['pos'] = ALFABET.find(inici[1])
+    r3['pos'] = ALFABET.find(inici[2])
+
+    # demana el missatge
+    missatge = input(pregunta).upper()
+
+    # guarda el missatge sense espais
+    missatge_net = ""
+    for c in missatge:
+        if c in ALFABET:
+            missatge_net += c
+    guardar_fitxer("Missatge.txt", missatge_net)
+
+    resultat = ""
+
+    # bucle principal lletra per lletra
+    for lletra in missatge_net:
+        # gira rotors
+        moure_rotors(r1, r2, r3)
+
+        # passa les lletres a numero
+        idx = ALFABET.find(lletra)
+
+        # circuit d'anada r3 -> r2 -> r1
+        idx = passar_pel_rotor(idx, r3, True)
+        idx = passar_pel_rotor(idx, r2, True)
+        idx = passar_pel_rotor(idx, r1, True)
+
+        # reflector
+        lletra_ref = REFLECTOR_B[idx]
+        idx = ALFABET.find(lletra_ref)
+
+        # circuit de tornada
+        idx = passar_pel_rotor(idx, r1, False)
+        idx = passar_pel_rotor(idx, r2, False)
+        idx = passar_pel_rotor(idx, r3, False)
+
+        # guarda resultat
+        resultat += ALFABET[idx]
+
+    # agrupa en grups de cinc lletres
+    resultat_final = ""
+    comptador = 0
+    for lletra in resultat:
+        resultat_final += lletra
+        comptador += 1
+        if comptador == 5:
+            resultat_final += " "
+            comptador = 0
+    
+    print(f"\nMISSATGE XIFRAT: {resultat_final}")
+    guardar_fitxer("Xifrat.txt", resultat_final)
 
 def desxifrar_missatge():
     print("Has triat: Desxifrar missatge")
-    # lògica de desxifrat
+    xifrar_missatge(pregunta="Escriu el missatge xifrat: ")
+
 
 def editar_rotors():
     print("Has triat: Editar rotors")
@@ -76,6 +195,7 @@ def mostrar_menu():
         if opcio == "1":
             xifrar_missatge()
         elif opcio == "2":
+            print("Per desxifrar, introdueix la mateixa configuració i el text xifrat.")
             desxifrar_missatge()
         elif opcio == "3":
             editar_rotors()

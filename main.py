@@ -171,9 +171,17 @@ def xifrar_missatge(pregunta="Escriu el missatge: "):
         if comptador == 5:
             resultat_final += " "
             comptador = 0
-    
-    print(f"\nMISSATGE XIFRAT: {resultat_final}")
+
+    # guarda el fitxer
     guardar_fitxer("Xifrat.txt", resultat_final)
+    
+    # resultat en pantalla despres de xifrar
+    num_lletres = len(resultat)
+    num_grups = len(resultat_final.split())
+
+    # mostra el numero de lletres i grups per pantalla
+    print(f'[OK] Missatge xifrat a "Xifrat.txt" ({num_lletres} lletres, {num_grups} grups de 5)')
+    
 
 def desxifrar_missatge():
     print("Has triat: Desxifrar missatge")
@@ -181,40 +189,59 @@ def desxifrar_missatge():
 
 
 def editar_rotors():
-    print("\n--- CREAR NOU ROTOR ---")
+    print("\n--- EDITAR ROTORS ---")
+    print("1. Modificar Rotor 1")
+    print("2. Modificar Rotor 2")
+    print("3. Modificar Rotor 3")
+    print("4. Tornar enrere")
     """
-    Genera un nou rotor
+    Modifica els rotors
     """
 
-    # demana el nom del nou rotor
-    nom_nou_rotor = input("Nom del nou rotor (ex: Rotor4.txt): ")
-    if not nom_nou_rotor.endswith(".txt"):
-        nom_nou_rotor += ".txt"
+    # pregunta quin rotor volem modificar
+    opcio = input("Quin rotor vols canviar? ")
 
-    # demana la permutacio
-    print("Escriu les 26 lletres de l'alfabet desordenades (totes juntes):")
-    perm = input("> ").upper().strip()
-
-    # comprovacio de que hi han vint-i-sis lletres
-    if len(perm) != 26 or not perm.isalpha():
-        print ("[ERROR] Han de ser 26 lletres exactes.")
+    # depenent de l'opcio seleccionada modificarem un roto o un altre, o en el cas quatre tornarem enrrere
+    nom_rotor = ""
+    if opcio == "1":
+        nom_rotor = "Rotor1.txt"
+    elif opcio == "2":
+        nom_rotor = "Rotor2.txt"
+    elif opcio == "3":
+        nom_rotor = "Rotor3.txt"
+    elif opcio == "4":
+        return
+    else:
+        print("[ERROR] Opció incorrecta.")
         return
     
-    # comprovacio de que no hi ha lletres repetides
+    print(f"Atenció: Estàs a punt de canviar la configuració de {nom_rotor}")
+
+    # demana la nova permutacio per al rotor sel·leccionat
+    print("Escriu la nova permutació (26 lletres seguides i sense repetir-se):")
+    perm = input("> ").upper().strip()
+
+    # valida que son vint-i-sis lletres
+    if len(perm) != 26 or not perm.isalpha():
+        print("[ERROR] Han de ser 26 lletres exactes de la A a la Z.")
+        return
+    
+    # valida que no hi ha cap lletra repetida
     if len(set(perm)) != 26:
-        print("[ERROR] No pots repetir lletres.")
+        print("[ERROR] No poden haver-hi lletres repetides.")
         return
     
     # demana el notch
     notch = input("Escriu la lletra del Notch: ").upper().strip()
     if len(notch) != 1 or notch not in ALFABET:
-        print("[AVÍS] Notch incorrecte, s'usarà 'Z' per defecte.")
+        print("[AVÍS] Notch invàlid, es posarà 'Z'.")
         notch = "Z"
-    
-    # guarda el fitxer
+
+    # sobrescriu el rotor
     contingut = f"{perm}\n{notch}"
-    guardar_fitxer(nom_nou_rotor, contingut)
-    print(f"[ÈXIT] Rotor creat correctament: {nom_nou_rotor}")
+    guardar_fitxer(nom_rotor, contingut)
+    print(f"[OK] {nom_rotor} actualitzat correctament.")
+
 
 def mostrar_menu():
     continuar = True

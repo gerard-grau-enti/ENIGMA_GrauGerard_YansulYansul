@@ -101,6 +101,9 @@ def carregar_rotor(nom_fitxer):
 # llògica de xifrat
 def xifrar_missatge(pregunta="Escriu el missatge: "): 
     print("\n--- CARREGANT ROTORS ---")
+    """
+    Xifra els missatges
+    """
 
     # carrega els fitxers
     r1 = carregar_rotor("Rotor1.txt")
@@ -178,8 +181,40 @@ def desxifrar_missatge():
 
 
 def editar_rotors():
-    print("Has triat: Editar rotors")
-    # configuració dels rotors
+    print("\n--- CREAR NOU ROTOR ---")
+    """
+    Genera un nou rotor
+    """
+
+    # demana el nom del nou rotor
+    nom_nou_rotor = input("Nom del nou rotor (ex: Rotor4.txt): ")
+    if not nom_nou_rotor.endswith(".txt"):
+        nom_nou_rotor += ".txt"
+
+    # demana la permutacio
+    print("Escriu les 26 lletres de l'alfabet desordenades (totes juntes):")
+    perm = input("> ").upper().strip()
+
+    # comprovacio de que hi han vint-i-sis lletres
+    if len(perm) != 26 or not perm.isalpha():
+        print ("[ERROR] Han de ser 26 lletres exactes.")
+        return
+    
+    # comprovacio de que no hi ha lletres repetides
+    if len(set(perm)) != 26:
+        print("[ERROR] No pots repetir lletres.")
+        return
+    
+    # demana el notch
+    notch = input("Escriu la lletra del Notch: ").upper().strip()
+    if len(notch) != 1 or notch not in ALFABET:
+        print("[AVÍS] Notch incorrecte, s'usarà 'Z' per defecte.")
+        notch = "Z"
+    
+    # guarda el fitxer
+    contingut = f"{perm}\n{notch}"
+    guardar_fitxer(nom_nou_rotor, contingut)
+    print(f"[ÈXIT] Rotor creat correctament: {nom_nou_rotor}")
 
 def mostrar_menu():
     continuar = True

@@ -19,28 +19,27 @@ def moure_rotors(r1, r2, r3):
     """
     Mou els rotors
     """
-    # el rotor tres sempre es mou
-    moure_r3 = True
+    # el rotor u sempre es mou primer
+    moure_r1 = True
     moure_r2 = False
-    moure_r1 = False
+    moure_r3 = False
 
     # busca on e´s el notch en entre el cero i el vint-i-cinc
-    notch3 = ALFABET.find(r3['notch'])
+    notch1 = ALFABET.find(r1['notch'])
     notch2 = ALFABET.find(r2['notch'])
 
-    # si el rotor tres està en el notch, arrosega el segon
-    if r3['pos'] == notch3:
+    # si el rotor u està en el notch, arrosega el segon
+    if r1['pos'] == notch1:
         moure_r2 = True
 
-    # si el rotor dos està en el notch, arrossega el primer i ha ell mateix
+    # si el rotor dos està en el notch, arrossega el rotor tres
     if r2['pos'] == notch2:
-        moure_r1 = True
-        moure_r2 = True
+        moure_r3 = True
 
     # executa els moviments sumant un i fent mòdul 26 per si passem de la z
-    if moure_r3: r3['pos'] = (r3['pos'] + 1) % 26
-    if moure_r2: r2['pos'] = (r2['pos'] + 1) % 26
     if moure_r1: r1['pos'] = (r1['pos'] + 1) % 26
+    if moure_r2: r2['pos'] = (r2['pos'] + 1) % 26
+    if moure_r3: r3['pos'] = (r3['pos'] + 1) % 26
 
 def passar_pel_rotor(index_entrada, rotor, es_anada):
     """
@@ -82,10 +81,12 @@ def carregar_rotor(nom_fitxer):
         
         permutacio = dades[0].strip().upper()
 
+        # nomes pot tenir vint-i-sis lletres i nomes de l'a a la z
         if len(permutacio) != 26 or not permutacio.isalpha():
             print(f"[ERROR] {nom_fitxer}: permutació incorrecta. Calen 26 lletres úniques A-Z. ")
             return None
         
+        # si no s'especifica notch, el notch sera z
         if len(dades) > 1:
             notch = dades[1].strip().upper()
         else:
@@ -96,7 +97,6 @@ def carregar_rotor(nom_fitxer):
     except Exception as e:
         print(f"[ERROR] Error llegint {nom_fitxer}: {e}")
         return None
-
 
 # llògica de xifrat
 def xifrar_missatge(pregunta="Escriu el missatge: "): 

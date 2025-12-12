@@ -15,7 +15,6 @@ def guardar_fitxer(nom_fitxer, contingut):
     except:
         print(f"[ERROR] No s'ha pogut guardar {nom_fitxer}")
 
-
 def moure_rotors(r1, r2, r3):
     """
     Mou els rotors
@@ -41,7 +40,6 @@ def moure_rotors(r1, r2, r3):
     if moure_r1: r1['pos'] = (r1['pos'] + 1) % 26
     if moure_r2: r2['pos'] = (r2['pos'] + 1) % 26
     if moure_r3: r3['pos'] = (r3['pos'] + 1) % 26
-
 
 def passar_pel_rotor(index_entrada, rotor, es_anada):
     """
@@ -100,8 +98,7 @@ def carregar_rotor(nom_fitxer):
         print(f"[ERROR] Error llegint {nom_fitxer}: {e}")
         return None
 
-
-# lògica de xifrat
+# llògica de xifrat
 def xifrar_missatge(pregunta="Escriu el missatge: "): 
     print("\n--- CARREGANT ROTORS ---")
     """
@@ -140,7 +137,6 @@ def xifrar_missatge(pregunta="Escriu el missatge: "):
 
     resultat = ""
 
-
     # bucle principal lletra per lletra
     for lletra in missatge_net:
         # gira rotors
@@ -149,23 +145,22 @@ def xifrar_missatge(pregunta="Escriu el missatge: "):
         # passa les lletres a numero
         idx = ALFABET.find(lletra)
 
-        # circuit d'anada r1 -> r2 -> r3
-        idx = passar_pel_rotor(idx, r1, True)
-        idx = passar_pel_rotor(idx, r2, True)
+        # circuit d'anada r3 -> r2 -> r1
         idx = passar_pel_rotor(idx, r3, True)
+        idx = passar_pel_rotor(idx, r2, True)
+        idx = passar_pel_rotor(idx, r1, True)
 
         # reflector
         lletra_ref = REFLECTOR_B[idx]
         idx = ALFABET.find(lletra_ref)
 
         # circuit de tornada
-        idx = passar_pel_rotor(idx, r3, False)
-        idx = passar_pel_rotor(idx, r2, False)
         idx = passar_pel_rotor(idx, r1, False)
+        idx = passar_pel_rotor(idx, r2, False)
+        idx = passar_pel_rotor(idx, r3, False)
 
         # guarda resultat
         resultat += ALFABET[idx]
-
 
     # agrupa en grups de cinc lletres
     resultat_final = ""
@@ -187,58 +182,10 @@ def xifrar_missatge(pregunta="Escriu el missatge: "):
     # mostra el numero de lletres i grups per pantalla
     print(f'[OK] Missatge xifrat a "Xifrat.txt" ({num_lletres} lletres, {num_grups} grups de 5)')
     
-# lògica de desxifrat
+
 def desxifrar_missatge():
     print("Has triat: Desxifrar missatge")
-
-    if not os.path.exists("Xifrat.txt"):
-        print("[ERROR] No existeix Xifrat.txt, primer xifra un missatge.")
-        return
-    
-    msg = open("Xifrat.txt", "r").read().replace(" ", "").upper().strip()
-
-    inici = input("Configuració inicial (ex: AAA): ").upper()
-    if len(inici) != 3 or any(c not in ALFABET for c in inici):
-        print("[ERROR] Formt incorrecte, es fara servir AAA")
-        inici = "AAA"
-
-    # recarregar els rotors
-    r1 = carregar_rotor("Rotor1.txt")
-    r2 = carregar_rotor("Rotor2.txt")
-    r3 = carregar_rotor("Rotor3.txt")
-
-    r1['pos'], r2['pos'], r3['pos'] = ALFABET.find(inici[0]), ALFABET.find(inici[1]), ALFABET.find(inici[2])
-
-    resultat = ""
-
-    for lletra in msg:
-        moure_rotors(r1, r2, r3)
-
-        idx = ALFABET.find(lletra)
-
-        # anada
-        idx = passar_pel_rotor(idx, r1, True)
-        idx = passar_pel_rotor(idx, r2, True)
-        idx = passar_pel_rotor(idx, r3, True)
-
-        # reflector
-        lletra_ref = REFLECTOR_B[idx]
-        idx = ALFABET.find(lletra_ref)
-
-        #tornada
-        idx = passar_pel_rotor(idx, r3, False)
-        idx = passar_pel_rotor(idx, r2, False)
-        idx = passar_pel_rotor(idx, r1, False)
-
-        # guarda resultat
-        resultat += ALFABET[idx]
-
-    if resultat == "":
-        print("[ERROR] Res a desxifrar.")
-        return
-
-    print("Missatge desxifrat:", resultat)
-    open("Missatge_desxifrat.txt", "w").write(resultat)
+    xifrar_missatge(pregunta="Escriu el missatge xifrat: ")
 
 
 def editar_rotors():

@@ -189,13 +189,18 @@ def xifrar_missatge(pregunta="Escriu el missatge: "):
     
 # lògica de desxifrat
 def desxifrar_missatge():
-    print("Has triat: Desxifrar missatge")
+    print("\n--- DESXIFRAR MISSATGE ---")
 
     if not os.path.exists("Xifrat.txt"):
         print("[ERROR] No existeix Xifrat.txt, primer xifra un missatge.")
         return
     
-    msg = open("Xifrat.txt", "r").read().replace(" ", "").upper().strip()
+    # neteja el fitxer treient espais i salts de linia
+    msg = open("Xifrat.txt", "r").read().replace(" ", "").replace("\n", "").upper().strip()
+
+    if not msg:
+        print("[ERROR] El fitxer Xifrat.txt està buit o no conté lletres vàlides.")
+        return
 
     inici = input("Configuració inicial (ex: AAA): ").upper()
     if len(inici) != 3 or any(c not in ALFABET for c in inici):
